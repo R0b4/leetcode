@@ -2,30 +2,46 @@
 
 class Solution {
 public:
-    int divide(int dividend, int divisor) {
-        unsigned int udi = dividend < 0 ? ~(unsigned)dividend + 1U : dividend;
-        unsigned int ude = divisor < 0 ? ~(unsigned)divisor + 1U : divisor;
+    inline int flipsign(int n) {
+        return (signed)(~((unsigned)n) + 1); 
+    }
 
-        int maxsh = (sizeof(int) << 3);
-        for (unsigned int i = ude; i; i >>= 1, maxsh -= 1);
+    unsigned int abs(int n) {
+        if (n < 0) return flipsign(n);
+        else return n;
+    }
+
+    unsigned int posdivide(unsigned int a, unsigned int b) {
+        unsigned int maxsh = (sizeof(int) << 3);
+        for (unsigned int i = b; i; i >>= 1, maxsh -= 1);
 
         unsigned int res = 0;
         for (int i = maxsh; i >= 0; i--) {
-            unsigned int min = ude << i;
-            if (min > udi) continue;
+            unsigned int min = b << i;
+            if (min > a) continue;
 
-            udi -= min;
+            a -= min;
             res |= 1 << i;
         }
 
-        if (dividend < 0 ^ divisor < 0) res = ~res + 1;
         return res;
+    }
+
+    int divide(int dividend, int divisor) {
+        bool negative = (dividend < 0) ^ (divisor < 0);
+
+        unsigned int res = posdivide(abs(dividend), abs(divisor));
+
+        if (!negative && res > INT32_MAX) return INT32_MAX;
+
+        if (negative) return flipsign(res);
+        else return res;
     }
 };
 
 int main() {
-    int divident = -2147483648;
-    int divisor = -1;
+    int divident = 7;
+    int divisor = -3;
 
     Solution s;
 
